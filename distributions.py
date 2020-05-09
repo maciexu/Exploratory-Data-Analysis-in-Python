@@ -70,7 +70,96 @@ plt.xlabel('Income (1986 USD)')
 plt.ylabel('CDF')
 plt.show()
 
+# What fraction of respondents report that they have 12 years of education or fewer?
+xx = gas['educ']<=12
+print(Cdf(xx))
+
+
+# Select educ
+educ = gss['educ']
+
+# Bachelor's degree
+bach = (educ >= 16)
+
+# Associate degree
+assc = (educ >= 14) & (educ < 16)
+
+# High school
+high = (educ <= 12)
+print(high.mean())
+
+income = gss['realinc']
+
+# Plot the CDFs
+Cdf(income[high]).plot(label='High school')
+Cdf(income[assc]).plot(label='Associate')
+Cdf(income[bach]).plot(label='Bachelor')
+
+# Label the axes
+plt.xlabel('Income (1986 USD)')
+plt.ylabel('CDF')
+plt.legend()
+plt.show()
 
 
 
+""" KDE 
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.norm.html
+"""
+# Extract realinc and compute its log
+income = gss['realinc']
+log_income = np.log10(income)
 
+# Compute mean and standard deviation
+mean = log_income.mean()
+std = log_income.std()
+print(mean, std)
+
+# Make a norm object
+from scipy.stats import norm
+dist = norm(mean, std)
+
+"""
+dist is a scipy.stats.norm object with the same mean and standard deviation as the data. 
+It provides .cdf(), which evaluates the normal cumulative distribution function.
+
+Be careful with capitalization: Cdf(), with an uppercase C, creates Cdf objects. 
+dist.cdf(), with a lowercase c, evaluates the normal cumulative distribution function.
+
+Modeling distrubution and comparing
+"""
+# EXample 1
+# Evaluate the model CDF
+xs = np.linspace(2, 5.5)
+ys = dist.cdf(xs)
+
+# Plot the model CDF
+plt.clf()
+plt.plot(xs, ys, color='gray')
+
+# Create and plot the Cdf of log_income
+Cdf(log_income).plot()
+    
+# Label the axes
+plt.xlabel('log10 of realinc')
+plt.ylabel('CDF')
+plt.show()
+
+
+
+# Example 2
+# Evaluate the normal PDF
+xs = np.linspace(2, 5.5)
+ys = dist.pdf(xs)
+
+# Plot the model PDF
+plt.clf()
+plt.plot(xs, ys, color='gray')
+
+# Plot the data KDE
+sns.kdeplot(log_income)
+
+# Label the axes
+plt.xlabel('log10 of realinc')
+plt.ylabel('PDF')
+plt.show()
